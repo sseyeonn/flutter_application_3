@@ -7,17 +7,18 @@ class Stock {
   late String market;
   late String marketId;
   late String isuCd;
-  late String amount;
-  late String chagesRati;
+  late int amount;
+  late double chagesRatio;
   late String changeCode;
-  late String changes;
+  late int changes;
   late String close;
   late String dept;
-  late String high;
-  late String low;
-  late String marcap;
-  late String open;
-  late String volume;
+  late int high;
+  late int low;
+  late int marcap;
+  late int open;
+  late int stocks;
+  late int volume;
 
   Stock({
     required this.code,
@@ -26,7 +27,7 @@ class Stock {
     required this.marketId,
     required this.isuCd,
     required this.amount,
-    required this.chagesRati,
+    required this.chagesRatio,
     required this.changeCode,
     required this.changes,
     required this.close,
@@ -36,62 +37,49 @@ class Stock {
     required this.marcap,
     required this.open,
     required this.volume,
+    required this.stocks,
   });
 
   factory Stock.fromJson(Map<String, dynamic> json) {
     return Stock(
-      code: json['Code'] ?? '',
-      name: json['Name'] ?? '',
-      market: json['Market'] ?? '',
-      marketId: json['MarketId'] ?? '',
-      isuCd: json['ISU_CD'] ?? '',
-      amount: json['Amount'].toString(),
-      chagesRati: json['ChagesRatio'].toString(),
-      changeCode: json['ChangeCode'] ?? '',
-      changes: json['Changes'].toString(),
-      close: json['Close'] ?? '',
-      dept: json['Dept'] ?? '',
-      high: json['High'].toString(),
-      low: json['Low'].toString(),
-      marcap: json['Marcap'].toString(),
-      open: json['Open'].toString(),
-      volume: json['Volume'].toString(),
+      code: json['Code'] ?? '0',
+      name: json['Name'] ?? '0',
+      market: json['Market'] ?? '0',
+      marketId: json['MarketId'] ?? '0',
+      isuCd: json['ISU_CD'] ?? '0',
+      amount: json['Amount'] ?? 0,
+      chagesRatio: json['ChagesRatio'] ?? 0.0,
+      changeCode: json['ChangeCode'] ?? '0',
+      changes: json['Changes'] ?? 0,
+      close: json['Close'] ?? '0',
+      dept: json['Dept'] ?? '0',
+      high: json['High'] ?? 0,
+      low: json['Low'] ?? 0,
+      marcap: json['Marcap'] ?? 0,
+      open: json['Open'] ?? 0,
+      volume: json['Volume'] ?? 0,
+      stocks: json['Stocks'] ?? 0,
     );
   }
 }
 
-//  "Amount": 598284999400,
-//     "ChagesRatio": -0.12,
-//     "ChangeCode": "2",
-//     "Changes": -100,
-//     "Close": "81700",
-//     "Code": "005930",
-//     "Dept": "",
-//     "High": 82300,
-//     "ISU_CD": "KR7005930003",
-//     "Low": 81000,
-//     "Marcap": 487731234335000,
-//     "Market": "KOSPI",
-//     "MarketId": "STK",
-//     "Name": "\uc0bc\uc131\uc804\uc790",
-//     "Open": 82300,
-//     "Stocks": 5969782550,
-//     "Volume": 7335448
-
 class StockService {
   Future<List<Stock>> getStocks({int page = 1, int ppv = 20}) async {
     String url =
-        'http://223.194.129.136:8070/stocks?page=$page&ppv=$ppv'; // 베이스 address
+        'http://223.194.129.136:8070/stock?page=$page&ppv=$ppv'; // 베이스 address
 
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
-      List<dynamic> body = jsonDecode(response.body);
-      List<Stock> stocks =
-          body.map((dynamic item) => Stock.fromJson(item)).toList();
+      Map<String, dynamic> body =
+          jsonDecode(response.body); // response.body : 웹브라우저 내용, 디코드: 맵형태
+      List<dynamic> data = body['data']; // 한 번 더 필터링, 여전히 맵 데이터
+      List<Stock> stocks = data
+          .map((dynamic item) => Stock.fromJson(item))
+          .toList(); // dynamic item : 맵 데이터, Stock.fromJson(item) : Stock 클래스로 변환
       return stocks;
     } else {
-      throw 'Failes to load stocks';
+      throw Exception('Failes to load stocks');
     }
   }
 }
